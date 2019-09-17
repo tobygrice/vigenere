@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Vigenere</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="vigenere.js"></script>
+  <link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
+  <script>
+    function main() {
+      var text, key, func, ttr, nttr, ettr, i;
+      text = document.getElementById("input").value; // get the input
+      key = document.getElementById("key").value; // get the key and remove any special characters (inlcuding spaces)
+      func = document.getElementById("encrypt").checked; // get the function
+      ttr = document.getElementById("ttr").value; // get the inputted ttr
+      nttr = document.getElementById("nttr").value; // get the outputted ttr
+
+      if ((text == null) || (text == "")) { // if there's no input
+        document.getElementById("output").value = null; // clear the output
+      };
+
+      if (func == true) { // encrypt is checked
+        if ((isNaN(ttr) == false) && ((ttr != null) && (ttr != ""))) { // ttr is a number
+          ettr = toWrd(ttr); // convert the ttr from a number to letters
+          ettr = vigenere(ettr, key, true, "nl"); // encrypt ttr as letters using the key
+          ttr = parseInt(ttr); // covert the ttr to an integer for the program (not displayed)
+          document.getElementById("nttr").value = ettr; // display the encrypted ttr
+        };
+        if ((document.getElementById("nttr").value).length != 4) { // if the encrypted ttr isn't four characters (aka 0)
+          ttr = 1; // set the ttr to 1
+          document.getElementById("arrowicon").src = "images/righticon_dark.jpg"; // grey the arrow
+        };
+        if (((document.getElementById("nttr").value).length == 4) && ((document.getElementById("ttr").value).length == 1)) {
+          document.getElementById("arrowicon").src = "images/righticon_light.jpg"; // highlight the arrow
+        };
+      };
+
+      if (func == false) { // decrypt is checked
+        if ((isNaN(ttr) == true) && ((ttr != null) && (ttr != ""))) { // ttr is not a number and is entered
+          ettr = vigenere(ttr, key, false, "nl"); // decode ttr using key
+          ttr = parseInt(toInt(ettr)); // convert the ttr to an integer
+          document.getElementById("nttr").value = ttr; // display the decrypted ttr
+        };
+        if ((document.getElementById("nttr").value).length != 1) { // if the decrypted ttr isn't 1 character (aka 0)
+          ttr = 1; // set the ttr to 1
+          document.getElementById("arrowicon").src = "images/righticon_dark.jpg"; // grey the arrow
+        };
+        if (((document.getElementById("nttr").value).length == 1) && ((document.getElementById("ttr").value).length != 0)) {
+          document.getElementById("arrowicon").src = "images/righticon_light.jpg"; // highlight the arrow
+        };
+      };
+
+      for (i=0; i < ttr; i++) { // repeat ttr times
+        text = vigenere(text, key, func, "nl"); // encrypt/decrypt the text.
+      };
+
+      if ((key!="") && (key!=null) && (text!="") && (text!=null)) { // if both the text and the key contain text
+        document.getElementById("output").value = text; // output the encrypted/decrypted message
+      };
+    };
+
+    function swap() {
+      var output, checked, nttr;
+      output = document.getElementById("output").value; // get the text in the output paragraph
+      checked = document.getElementById("encrypt").checked; // get the function
+      nttr = String(document.getElementById("nttr").value); // get the outputted ttr
+
+      switch (checked) { // swap radio button selection
+        case true: // encrypt is selected
+          document.getElementById("encrypt").checked = false; // select decrypt
+          break;
+        case false: // decrypt is selected
+          document.getElementById("encrypt").checked = true; // select encrypt
+          break;
+      };
+
+      document.getElementById("ttr").value = nttr; // set the ttr value to the outputted ttr
+      document.getElementById("input").value = output; // set textarea to reformatted contents of output paragraph
+      main(); // run cipher to get correct output
+      funcChange(); // run the method change function
+    };
+
+    function funcChange() {
+      var method, input, output, ttr, nttr;
+      method = document.getElementById("encrypt").checked;
+      input = document.getElementById("input");
+      output = document.getElementById("output");
+      ttr = document.getElementById("ttr");
+      nttr = document.getElementById("nttr");
+
+      if (method == true) { // encrypt
+        input.placeholder = "Plaintext";
+        output.placeholder = "Encrypted text";
+        ttr.placeholder = "∞";
+        nttr.placeholder = "E ∞";
+      }
+
+      if (method == false) { // decrypt
+        input.placeholder = "Encrypted text";
+        output.placeholder = "Plaintext";
+        ttr.placeholder = "E ∞";
+        nttr.placeholder = "∞";
+      };
+    };
+
+    function checkBelow() {
+      var method, ttr, nttr;
+      method = document.getElementById("encrypt").checked;
+      ttr = document.getElementById("ttr").value;
+
+      if (method == true) { // encrypt
+        if (parseInt(ttr) > 9) { // if ttr is greater than 9
+          document.getElementById("ttr").value = "9"; // set ttr to 9
+        };
+
+        if (parseInt(ttr) < 1) { // if ttr is less than 1
+          document.getElementById("ttr").value = "1"; // set ttr to 1
+        };
+      };
+
+      if ((ttr == "") || (ttr == null)) { // if ttr is empty
+        document.getElementById("ttr").value = null; // make ttr null
+        document.getElementById("nttr").value = null; // make outputted ttr null
+      };
+
+      main(); // run the main function
+
+      nttr = String(document.getElementById("nttr").value); // get the outputted value
+      if ((nttr == "NaN") || (nttr == "")) { // if the outputted value is NaN
+        document.getElementById("nttr").value = null; // set the outputted value to null
+      };
+    };
+</script>
+</head>
+
+<body onload="funcChange();">
+  <input id="ttr" onchange="checkBelow();main();" onkeyup="main();checkBelow();"></input>
+  <input id="nttr" onchange="checkBelow();" onkeyup="checkBelow();" readonly="true"></input>
+  <img id="arrowicon" src="images/righticon_dark.jpg"></img>
+
+  <label class="container"><br>
+    <input type="checkbox" id="encrypt" checked="checked" name="func" onchange="main();funcChange();checkBelow();">
+    <span class="checkmark"></span>
+  </label>
+  <img class="swapbutton" src="images/swap_icon.jpg" onclick="swap();"></img>
+
+  <input id="key" placeholder="Passkey" spellcheck="false" onkeyup="main();checkBelow();" onchange="main();checkBelow();"></input><br>
+  <textarea id="input" onkeyup="main();checkBelow();" onchange="main();checkBelow();" spellcheck="false"></textarea><br>
+  <textarea id="output" spellcheck="false" readonly="true"></textarea>
+</body>
+</html>
